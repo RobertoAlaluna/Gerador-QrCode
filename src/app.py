@@ -1,6 +1,7 @@
 import os
 import platform
 import subprocess
+import sys
 from pathlib import Path
 
 import customtkinter as ctk
@@ -8,6 +9,16 @@ from PIL import Image
 from tkinter import filedialog, messagebox
 
 from src.qrcode_gen import gerar_qrcode
+
+
+def _caminho_recurso(caminho_relativo: str) -> Path:
+    """Descobre onde um recurso está, tanto rodando via Python quanto
+    empacotado como executável pelo PyInstaller."""
+    if getattr(sys, "frozen", False):
+        base = Path(sys._MEIPASS)
+    else:
+        base = Path(__file__).resolve().parent.parent
+    return base / caminho_relativo
 
 
 ctk.set_appearance_mode("Light")
@@ -53,6 +64,7 @@ class App(ctk.CTk):
         self.title("Gerador de QR Code")
         self.geometry("1000x640")
         self.minsize(880, 620)
+        self._aplicar_icone()
 
         self.fonte = _fonte_padrao()
         self.caminho_logo = ""
@@ -404,6 +416,13 @@ class App(ctk.CTk):
         )
         self.lbl_preview.configure(image=self._imagem_preview, text="")
 
+    def _aplicar_icone(self):
+        caminho_icone = _caminho_recurso("assets/logo.ico")
+        if caminho_icone.exists():
+            try:
+                self.iconbitmap(str(caminho_icone))
+            except Exception:
+                pass
 
 if __name__ == "__main__":
     app = App()
